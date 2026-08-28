@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IT Creative Synergy — Interactive 3D Innovation Campus</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300f0ff'><polygon points='12 2 2 22 22 22'/></svg>" />
+  <script type="module" crossorigin src="/assets/index-CszFO2WW.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BWFPLk2T.css">
+</head>
+<body>
+  <!-- Three.js Canvas -->
+  <canvas id="webgl"></canvas>
+
+  <!-- UI Overlay -->
+  <div class="ui-overlay">
+    <!-- Top Navigation -->
+    <header class="top-bar">
+      <div class="brand" id="brand-home-btn" title="Ir al Inicio">
+        <div class="brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 22 22 22"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">IT CREATIVE SYNERGY</span>
+          <span class="brand-tag">3D INNOVATION SPACE</span>
+        </div>
+      </div>
+
+      <!-- Center Room Quick Links -->
+      <nav class="nav-links">
+        <button class="nav-link-btn active" data-view="welcome_bot">BOT GUÍA</button>
+        <button class="nav-link-btn" data-view="tower">PROJECTS CORE</button>
+        <button class="nav-link-btn" data-view="engine_room">ROOM 1 | INFRA</button>
+        <button class="nav-link-btn" data-view="idea_lab">ROOM 2 | IDEAS</button>
+        <button class="nav-link-btn" data-view="team">ROOM 3 | TEAM</button>
+        <button class="nav-link-btn" data-view="skills">ROOM 4 | SKILLS</button>
+        <button class="nav-link-btn" data-view="overview" style="color: var(--accent-amber);">VISTA GENERAL</button>
+      </nav>
+
+      <!-- Right Action Controls -->
+      <div class="top-actions">
+        <!-- Live FPS -->
+        <div class="stats-badge">
+          <div class="status-dot"></div>
+          <span id="fps-counter">60 FPS</span>
+        </div>
+
+        <!-- Audio Mute/Unmute -->
+        <button class="btn-icon" id="audio-toggle-btn" title="Sonido On / Off">
+          <svg id="icon-sound-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <svg id="icon-sound-off" style="display: none;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+
+        <!-- Theme Switcher -->
+        <button class="btn-icon" id="theme-btn" title="Cambiar Tema de Iluminación">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+
+        <!-- Start Tour Button -->
+        <button class="btn-primary" id="start-tour-btn">
+          <span>TOUR 3D</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Stage Tour Stepper Banner (Top Center) -->
+    <div class="stage-stepper-banner" id="stage-banner">
+      <button class="stepper-arrow-btn" id="btn-prev-stage" title="Escenario Anterior (←)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <div class="stepper-info">
+        <span class="stepper-count" id="stepper-count">ESCENARIO 1 DE 6</span>
+        <h3 class="stepper-title" id="stepper-title">Bot Guía & Welcome Hub</h3>
+      </div>
+
+      <button class="stepper-arrow-btn" id="btn-next-stage" title="Siguiente Escenario (→)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Interactive Tooltip Toast -->
+    <div class="object-tooltip" id="object-tooltip">
+      <div class="tooltip-tag" id="tooltip-tag">MÓDULO 3D</div>
+      <div class="tooltip-title" id="tooltip-title">Título del Elemento</div>
+      <div class="tooltip-desc" id="tooltip-desc">Descripción del elemento.</div>
+      <div class="tooltip-hint">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>Haz clic en los proyectos flotantes, salas o integrantes</span>
+      </div>
+    </div>
+
+    <!-- Bottom Floating Dock: 6 Camera Viewpoints -->
+    <footer class="bottom-dock">
+      <nav class="dock-container">
+        <button class="dock-btn active" data-view="welcome_bot" title="Bot Guía">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+            <circle cx="12" cy="5" r="2"></circle>
+            <path d="M12 7v4"></path>
+            <line x1="8" y1="16" x2="8.01" y2="16"></line>
+            <line x1="16" y1="16" x2="16.01" y2="16"></line>
+          </svg>
+          <span>Bot Guía</span>
+        </button>
+
+        <button class="dock-btn" data-view="tower" title="Torre de Proyectos Flotantes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span>Projects Core</span>
+        </button>
+
+        <button class="dock-btn" data-view="engine_room" title="Room 1: The Engine Room">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+          <span>Room 1 | Infra</span>
+        </button>
+
+        <button class="dock-btn" data-view="idea_lab" title="Room 2: The Idea Lab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18h6"></path>
+            <path d="M10 22h4"></path>
+            <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path>
+          </svg>
+          <span>Room 2 | Ideas</span>
+        </button>
+
+        <button class="dock-btn" data-view="team" title="Room 3: The Team Square">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Room 3 | Team</span>
+        </button>
+
+        <button class="dock-btn" data-view="skills" title="Room 4: Skill Tree">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20"></path>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          <span>Room 4 | Skills</span>
+        </button>
+
+        <button class="dock-btn" data-view="overview" title="Vista Panorámica">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="12 8 8 12 12 16 16 12 12 8"></polygon>
+          </svg>
+          <span>Panorama</span>
+        </button>
+      </nav>
+    </footer>
+  </div>
+
+  <!-- PROJECT MODAL DIALOG -->
+  <div class="modal-backdrop" id="project-modal">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="close-project-modal">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="modal-badge" id="modal-project-tag">PROJECT / CLOUD</div>
+      <h2 class="modal-title" id="modal-project-title">Nombre del Proyecto</h2>
+      <h4 class="modal-subtitle" id="modal-project-subtitle">Subtítulo o categoría técnica</h4>
+      <p class="modal-desc" id="modal-project-desc">Descripción exhaustiva de la arquitectura del proyecto.</p>
+
+      <div class="modal-actions">
+        <button class="btn-launch" id="btn-open-project-window">
+          <span>🚀 Abrir Proyecto en Nueva Ventana</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM MEMBER PROFILE MODAL -->
+  <div class="modal-backdrop" id="member-modal">
+    <div class="modal-card member-card-modal">
+      <button class="modal-close-btn" id="close-member-modal">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="member-header">
+        <div class="member-avatar-badge" id="member-avatar-initials">N</div>
+        <div>
+          <h2 class="modal-title" id="modal-member-name">Nahuel</h2>
+          <span class="modal-subtitle" id="modal-member-role">Tech Lead & DevOps</span>
+        </div>
+      </div>
+
+      <p class="modal-desc" id="modal-member-bio">Bio del integrante.</p>
+
+      <div class="member-stack-box">
+        <span class="stack-label">TECNOLOGÍAS CLAVE</span>
+        <p class="stack-text" id="modal-member-stack">Kubernetes • Terraform • AWS • Docker</p>
+      </div>
+
+      <div class="modal-actions">
+        <a href="https://github.com" target="_blank" class="btn-social" id="member-github-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+          </svg>
+          <span>GitHub</span>
+        </a>
+        <a href="https://linkedin.com" target="_blank" class="btn-social" id="member-linkedin-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+            <rect x="2" y="9" width="4" height="12"></rect>
+            <circle cx="4" cy="4" r="2"></circle>
+          </svg>
+          <span>LinkedIn</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
