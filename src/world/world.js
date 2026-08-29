@@ -716,12 +716,12 @@ export class World {
   addPerpendicularPanels(group, { accentA = '#00e5ff', accentB = '#ff2d95' } = {}) {
     const halfPi = Math.PI / 2;
     const layouts = [
-      { kind: 'code', pos: [-5.05, 2.95, -3.2], size: [5.8, 3.5], rot: [0.02, halfPi, 0], magenta: false },
-      { kind: 'logs', pos: [5.15, 2.55, -3.5], size: [5.4, 3.2], rot: [0.03, -halfPi, 0], magenta: true },
-      { kind: 'chart', pos: [-3.55, 2.15, 1.6], size: [3.8, 2.6], rot: [0.05, 0.95, 0], magenta: false },
-      { kind: 'dashboard', pos: [3.65, 3.25, 1.2], size: [3.5, 2.4], rot: [0.06, -1.02, 0], magenta: true },
-      { kind: 'metrics', pos: [-6.4, 5.15, -10.2], size: [4.2, 2.5], rot: [0.08, 1.35, 0], magenta: true },
-      { kind: 'nodes', pos: [6.5, 4.75, -10.6], size: [4.6, 2.7], rot: [0.05, -1.32, 0], magenta: false }
+      { kind: 'code', pos: [-10.6, 2.95, -4.3], size: [5.8, 3.5], rot: [0.02, halfPi, 0], magenta: false },
+      { kind: 'logs', pos: [10.7, 2.55, -4.5], size: [5.4, 3.2], rot: [0.03, -halfPi, 0], magenta: true },
+      { kind: 'chart', pos: [-9.4, 2.15, -3.5], size: [3.8, 2.6], rot: [0.05, 0.95, 0], magenta: false },
+      { kind: 'dashboard', pos: [9.5, 3.25, -3.7], size: [3.5, 2.4], rot: [0.06, -1.02, 0], magenta: true },
+      { kind: 'metrics', pos: [-11.4, 5.15, -8.5], size: [4.2, 2.5], rot: [0.08, 1.35, 0], magenta: true },
+      { kind: 'nodes', pos: [11.5, 4.75, -8.8], size: [4.6, 2.7], rot: [0.05, -1.32, 0], magenta: false }
     ];
 
     const panels = group.userData.atmospherePanels || [];
