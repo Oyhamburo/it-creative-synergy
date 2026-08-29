@@ -1,14 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-primary: #9bb7d4;
-  --bg-card: rgba(18, 24, 38, 0.82);
-  --bg-card-hover: rgba(28, 36, 56, 0.95);
-  --border-subtle: rgba(255, 255, 255, 0.14);
+  --bg-primary: #0b101c;
+  --bg-card: rgba(14, 19, 31, 0.88);
+  --bg-card-hover: rgba(22, 30, 48, 0.95);
+  --border-subtle: rgba(255, 255, 255, 0.12);
   --border-focus: rgba(0, 240, 255, 0.55);
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
-  --text-muted: #64748b;
   --accent-cyan: #00f0ff;
   --accent-amber: #ffaa00;
   --accent-pink: #ff0066;
@@ -50,7 +49,7 @@ body, html {
   cursor: grabbing;
 }
 
-/* UI Overlay Layer */
+/* UI Overlay */
 .ui-overlay {
   position: fixed;
   top: 0;
@@ -62,7 +61,7 @@ body, html {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 20px 28px;
+  padding: 24px 32px;
 }
 
 /* Top Navbar */
@@ -81,9 +80,9 @@ body, html {
   background: var(--bg-card);
   backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-subtle);
-  padding: 8px 18px;
+  padding: 10px 20px;
   border-radius: 9999px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   transition: transform 0.2s;
 }
@@ -93,8 +92,8 @@ body, html {
 }
 
 .brand-icon {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 10px;
   background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
   display: flex;
@@ -110,7 +109,7 @@ body, html {
 
 .brand-title {
   font-weight: 900;
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 0.04em;
   color: #ffffff;
 }
@@ -123,46 +122,80 @@ body, html {
   letter-spacing: 0.08em;
 }
 
-/* Nav Links Centered */
-.nav-links {
+/* 2 Section Navigation Bar */
+.section-nav {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: var(--bg-card);
   backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-subtle);
   padding: 6px 10px;
   border-radius: 9999px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.nav-link-btn {
+.sec-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
-  padding: 7px 13px;
+  padding: 8px 16px;
   border-radius: 9999px;
   cursor: pointer;
   transition: all 0.25s ease;
   letter-spacing: 0.04em;
 }
 
-.nav-link-btn:hover {
+.sec-nav-btn:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.08);
 }
 
-.nav-link-btn.active {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(255, 0, 102, 0.25));
+.sec-nav-btn.active {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(255, 170, 0, 0.25));
   color: #ffffff;
-  border: 1px solid var(--border-focus);
-  box-shadow: 0 0 16px rgba(0, 240, 255, 0.3);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.35);
 }
 
-/* Top Action Buttons */
+.sec-nav-btn[data-backdrop="matrix"].active {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.28), rgba(0, 80, 40, 0.4));
+  border-color: rgba(0, 255, 136, 0.55);
+  box-shadow: 0 0 18px rgba(0, 255, 136, 0.35);
+}
+
+.sec-nav-btn[data-backdrop="sunset"].active {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.32), rgba(255, 45, 149, 0.28));
+  border-color: rgba(255, 140, 64, 0.6);
+  box-shadow: 0 0 18px rgba(255, 107, 53, 0.35);
+}
+
+.backdrop-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.swatch-nebula {
+  background: linear-gradient(135deg, #00f0ff, #ff2d95);
+}
+
+.swatch-matrix {
+  background: linear-gradient(135deg, #00ff88, #0b3d2a);
+}
+
+.swatch-sunset {
+  background: linear-gradient(135deg, #ff6b35, #ff2d95);
+}
+
 .top-actions {
   display: flex;
   align-items: center;
@@ -170,9 +203,9 @@ body, html {
 }
 
 .btn-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
   background: var(--bg-card);
   backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-subtle);
@@ -182,7 +215,7 @@ body, html {
   justify-content: center;
   cursor: pointer;
   transition: all 0.25s;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .btn-icon:hover {
@@ -190,26 +223,6 @@ body, html {
   border-color: var(--border-focus);
   color: var(--accent-cyan);
   transform: translateY(-2px);
-}
-
-.btn-primary {
-  padding: 9px 18px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent-cyan), #0077ff);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #000000;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
-  transition: all 0.25s;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 0 28px rgba(0, 240, 255, 0.7);
 }
 
 /* FPS Badge */
@@ -224,8 +237,8 @@ body, html {
   background: var(--bg-card);
   backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-subtle);
-  padding: 9px 12px;
-  border-radius: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
 }
 
 .status-dot {
@@ -242,73 +255,11 @@ body, html {
   50% { opacity: 0.4; transform: scale(0.8); }
 }
 
-/* Stage Stepper Banner (Center Top Stage Tour Bar) */
-.stage-stepper-banner {
-  align-self: center;
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border-subtle);
-  border-bottom: 2px solid var(--accent-cyan);
-  padding: 10px 20px;
-  border-radius: 20px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-  pointer-events: auto;
-  transition: transform 0.3s ease;
-}
-
-.stepper-arrow-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--border-subtle);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.stepper-arrow-btn:hover {
-  background: var(--accent-cyan);
-  color: #000000;
-  box-shadow: 0 0 16px rgba(0, 240, 255, 0.6);
-  transform: scale(1.1);
-}
-
-.stepper-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  min-width: 240px;
-}
-
-.stepper-count {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--accent-cyan);
-  letter-spacing: 0.08em;
-}
-
-.stepper-title {
-  font-size: 15px;
-  font-weight: 800;
-  color: #ffffff;
-  margin-top: 2px;
-}
-
 /* Interactive Object Tooltip */
 .object-tooltip {
   position: absolute;
-  top: 140px;
-  left: 28px;
+  top: 90px;
+  left: 32px;
   max-width: 360px;
   background: var(--bg-card);
   backdrop-filter: var(--glass-blur);
@@ -316,7 +267,7 @@ body, html {
   border-left: 4px solid var(--accent-cyan);
   padding: 18px 22px;
   border-radius: 18px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
   pointer-events: auto;
   opacity: 0;
   transform: translateX(-20px);
@@ -360,8 +311,8 @@ body, html {
   gap: 6px;
 }
 
-/* Bottom Navigation Dock */
-.bottom-dock {
+/* Bottom Bar Pill */
+.bottom-bar {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -369,60 +320,77 @@ body, html {
   pointer-events: auto;
 }
 
-.dock-container {
+.dock-pill {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 8px;
   background: var(--bg-card);
   backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-subtle);
-  padding: 8px 12px;
+  border-bottom: 2px solid var(--accent-amber);
+  padding: 12px 24px;
   border-radius: 20px;
-  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.5);
 }
 
-.dock-btn {
+.dock-header-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 14px;
-  border-radius: 14px;
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-sans);
+  gap: 16px;
+}
+
+.dock-pill-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
   font-weight: 700;
-  font-size: 12px;
+  color: var(--accent-amber);
+  letter-spacing: 0.08em;
+}
+
+.dock-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.project-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.p-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 9999px;
   cursor: pointer;
-  transition: all 0.25s;
+  transition: all 0.2s;
 }
 
-.dock-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
+.p-chip:hover {
+  background: rgba(0, 240, 255, 0.2);
+  border-color: var(--accent-cyan);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
 }
 
-.dock-btn.active {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(255, 0, 102, 0.25));
-  color: #ffffff;
-  border-color: var(--border-focus);
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
-}
-
-.dock-btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* Modals */
+/* Modal */
 .modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(8, 12, 22, 0.7);
-  backdrop-filter: blur(12px);
+  background: rgba(6, 10, 18, 0.75);
+  backdrop-filter: blur(14px);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -441,12 +409,12 @@ body, html {
 .modal-card {
   width: 100%;
   max-width: 520px;
-  background: rgba(16, 22, 36, 0.95);
+  background: rgba(14, 19, 31, 0.96);
   border: 1px solid var(--border-subtle);
   border-radius: 24px;
   padding: 36px 32px;
   position: relative;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
   transform: scale(0.92);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -541,84 +509,14 @@ body, html {
   box-shadow: 0 0 36px rgba(0, 240, 255, 0.7);
 }
 
-/* Team Member Modal */
-.member-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.member-avatar-badge {
-  width: 56px;
-  height: 56px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-pink));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: 800;
-  color: #fff;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
-}
-
-.member-stack-box {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-subtle);
-  border-radius: 14px;
-  padding: 14px;
-  margin-bottom: 20px;
-}
-
-.stack-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--accent-emerald);
-  display: block;
-  margin-bottom: 4px;
-}
-
-.stack-text {
-  font-size: 13px;
-  color: #ffffff;
-  font-weight: 600;
-}
-
-.btn-social {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--border-subtle);
-  color: #fff;
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 700;
-  transition: all 0.2s;
-}
-
-.btn-social:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: var(--accent-cyan);
-}
-
-@media (max-width: 900px) {
-  .nav-links {
+@media (max-width: 768px) {
+  .ui-overlay {
+    padding: 16px;
+  }
+  .sec-nav-btn span {
     display: none;
   }
-  .dock-btn span {
+  .project-tags {
     display: none;
-  }
-  .dock-btn {
-    padding: 10px 12px;
-  }
-  .stage-stepper-banner {
-    width: 90%;
   }
 }

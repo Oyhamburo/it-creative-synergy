@@ -8,7 +8,12 @@ class App {
   constructor() {
     this.canvas = document.querySelector('#webgl');
     this.sceneManager = new SceneManager(this.canvas);
-    this.world = new World(this.sceneManager.scene, this.sceneManager.camera, this.sceneManager.renderer);
+    this.world = new World(
+      this.sceneManager.scene,
+      this.sceneManager.camera,
+      this.sceneManager.renderer,
+      this.sceneManager
+    );
 
     this.raycaster = new THREE.Raycaster();
     this.pointer = new THREE.Vector2(-999, -999);
@@ -21,32 +26,28 @@ class App {
 
     this.themes = [
       {
-        name: 'Daylight Sunset (Default)',
-        sky: '#9bb7d4',
-        sun: '#fff3e0',
-        ambient: 0xdde8fa,
-        fill: 0xffbfa3
+        name: 'Cyber Global Hub (Default)',
+        bg: '#0b101c',
+        ambient: 0x1a253c,
+        key: 0xe2eeff
       },
       {
-        name: 'Cyberpunk Neon',
-        sky: '#160a28',
-        sun: '#ff0077',
-        ambient: 0x24143d,
-        fill: 0x00f0ff
+        name: 'Neon Cyberpunk',
+        bg: '#140a24',
+        ambient: 0x27143e,
+        key: 0xff0077
       },
       {
-        name: 'Deep Tech Night',
-        sky: '#09101f',
-        sun: '#60a5fa',
-        ambient: 0x141f36,
-        fill: 0x38bdf8
+        name: 'Deep Astral',
+        bg: '#060d1a',
+        ambient: 0x101a2e,
+        key: 0x00f0ff
       },
       {
         name: 'Emerald Matrix',
-        sky: '#061712',
-        sun: '#00ff88',
-        ambient: 0x0e2e22,
-        fill: 0x77ffaa
+        bg: '#061712',
+        ambient: 0x0c291e,
+        key: 0x00ff88
       }
     ];
     this.currentThemeIndex = 0;
@@ -54,13 +55,7 @@ class App {
     this.initUI();
     this.initModals();
     this.initRaycasting();
-    this.initKeyboardNav();
     this.startLoop();
-
-    // Start with initial message on the Bot Guía
-    setTimeout(() => {
-      this.updateStepperUI('welcome_bot');
-    }, 100);
   }
 
   initUI() {
@@ -85,35 +80,27 @@ class App {
       audioBtn.classList.toggle('active', !isMuted);
     });
 
-    // 2. Navigation Buttons (Top Navbar & Bottom Dock)
-    const allNavButtons = document.querySelectorAll('.nav-link-btn, .dock-btn');
-    allNavButtons.forEach(btn => {
+    document.querySelectorAll('[data-backdrop]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const view = btn.dataset.view;
-        this.navigateToView(view);
+        const id = btn.dataset.backdrop;
+        audioManager.playUIClick();
+        this.world.setBackdrop(id);
+        document.querySelectorAll('[data-backdrop]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.backdrop === id);
+        });
       });
     });
 
-    // Brand Home Button
-    document.querySelector('#brand-home-btn').addEventListener('click', () => {
-      this.navigateToView('welcome_bot');
-    });
-
-    // Start Tour Button
-    document.querySelector('#start-tour-btn').addEventListener('click', () => {
-      this.navigateToView('welcome_bot');
-    });
-
-    // 3. Next / Prev Stage Stepper Buttons
-    document.querySelector('#btn-next-stage').addEventListener('click', () => {
-      const nextView = this.sceneManager.nextStage();
-      this.navigateToView(nextView);
-    });
-
-    document.querySelector('#btn-prev-stage').addEventListener('click', () => {
-      const prevView = this.sceneManager.prevStage();
-      this.navigateToView(prevView);
+    // 3. Project Chips in Bottom Bar
+    document.querySelectorAll('.p-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const pId = chip.dataset.project;
+        const projectObj = this.world.interactiveObjects.find(obj => obj.name === pId);
+        if (projectObj && projectObj.userData && projectObj.userData.onClick) {
+          projectObj.userData.onClick();
+        }
+      });
     });
 
     // 4. Theme Switcher
@@ -126,87 +113,18 @@ class App {
     });
   }
 
-  initKeyboardNav() {
-    window.addEventListener('keydown', (e) => {
-      if (document.querySelector('.modal-backdrop.open')) return;
-
-      if (e.key === 'ArrowRight' || e.key === 'KeyD') {
-        const nextView = this.sceneManager.nextStage();
-        this.navigateToView(nextView);
-      } else if (e.key === 'ArrowLeft' || e.key === 'KeyA') {
-        const prevView = this.sceneManager.prevStage();
-        this.navigateToView(prevView);
-      } else if (e.key === 'Digit1') {
-        this.navigateToView('welcome_bot');
-      } else if (e.key === 'Digit2') {
-        this.navigateToView('tower');
-      } else if (e.key === 'Digit3') {
-        this.navigateToView('engine_room');
-      } else if (e.key === 'Digit4') {
-        this.navigateToView('idea_lab');
-      } else if (e.key === 'Digit5') {
-        this.navigateToView('team');
-      } else if (e.key === 'Digit6') {
-        this.navigateToView('skills');
-      } else if (e.key === 'Digit0' || e.key === 'Space') {
-        this.navigateToView('overview');
-      }
-    });
-  }
-
-  navigateToView(viewName) {
-    audioManager.playTransition();
-    this.sceneManager.switchViewpoint(viewName);
-
-    // Sync active state on buttons
-    document.querySelectorAll('.nav-link-btn, .dock-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.view === viewName);
-    });
-
-    this.updateStepperUI(viewName);
-  }
-
-  updateStepperUI(viewName) {
-    const vp = this.sceneManager.viewpoints[viewName];
-    if (!vp) return;
-
-    const countElem = document.querySelector('#stepper-count');
-    const titleElem = document.querySelector('#stepper-title');
-
-    if (vp.step > 0) {
-      countElem.textContent = `ESCENARIO ${vp.step} DE 6`;
-      titleElem.textContent = vp.title.replace(/Escenario \d+: /, '');
-    } else {
-      countElem.textContent = 'PANORAMA COMPLETO';
-      titleElem.textContent = 'Vista General del Campus';
-    }
-
-    this.showTooltip({
-      name: vp.title,
-      description: vp.subtitle,
-      type: 'escenario'
-    });
-  }
-
   applyTheme(theme) {
     gsap.to(this.sceneManager.scene.fog.color, {
-      r: new THREE.Color(theme.sky).r,
-      g: new THREE.Color(theme.sky).g,
-      b: new THREE.Color(theme.sky).b,
+      r: new THREE.Color(theme.bg).r,
+      g: new THREE.Color(theme.bg).g,
+      b: new THREE.Color(theme.bg).b,
       duration: 1.2
     });
 
     gsap.to(this.sceneManager.scene.background, {
-      r: new THREE.Color(theme.sky).r,
-      g: new THREE.Color(theme.sky).g,
-      b: new THREE.Color(theme.sky).b,
-      duration: 1.2
-    });
-
-    gsap.to(this.sceneManager.sunLight.color, {
-      r: new THREE.Color(theme.sun).r,
-      g: new THREE.Color(theme.sun).g,
-      b: new THREE.Color(theme.sun).b,
+      r: new THREE.Color(theme.bg).r,
+      g: new THREE.Color(theme.bg).g,
+      b: new THREE.Color(theme.bg).b,
       duration: 1.2
     });
 
@@ -217,16 +135,16 @@ class App {
       duration: 1.2
     });
 
-    gsap.to(this.sceneManager.fillLight.color, {
-      r: new THREE.Color(theme.fill).r,
-      g: new THREE.Color(theme.fill).g,
-      b: new THREE.Color(theme.fill).b,
+    gsap.to(this.sceneManager.keyLight.color, {
+      r: new THREE.Color(theme.key).r,
+      g: new THREE.Color(theme.key).g,
+      b: new THREE.Color(theme.key).b,
       duration: 1.2
     });
 
     this.showTooltip({
       name: `Tema: ${theme.name}`,
-      description: 'Paleta cromática atmosférica sincronizada.',
+      description: 'Iluminación ambiental sincronizada.',
       type: 'tema'
     });
   }
@@ -262,35 +180,10 @@ class App {
       projectModal.classList.remove('open');
     });
 
-    const memberModal = document.querySelector('#member-modal');
-    const closeMemberModal = document.querySelector('#close-member-modal');
-    const memberAvatarInitials = document.querySelector('#member-avatar-initials');
-    const modalMemberName = document.querySelector('#modal-member-name');
-    const modalMemberRole = document.querySelector('#modal-member-role');
-    const modalMemberBio = document.querySelector('#modal-member-bio');
-    const modalMemberStack = document.querySelector('#modal-member-stack');
-
-    window.addEventListener('open-member-modal', (e) => {
-      const m = e.detail;
-      memberAvatarInitials.textContent = m.name.charAt(0);
-      modalMemberName.textContent = m.name;
-      modalMemberRole.textContent = m.role;
-      modalMemberBio.textContent = m.bio;
-      modalMemberStack.textContent = m.stack;
-
-      memberModal.classList.add('open');
-    });
-
-    closeMemberModal.addEventListener('click', () => {
-      memberModal.classList.remove('open');
-    });
-
-    [projectModal, memberModal].forEach(modal => {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.classList.remove('open');
-        }
-      });
+    projectModal.addEventListener('click', (e) => {
+      if (e.target === projectModal) {
+        projectModal.classList.remove('open');
+      }
     });
   }
 
