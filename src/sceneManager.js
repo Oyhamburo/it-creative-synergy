@@ -126,7 +126,7 @@ export class SceneManager {
     this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.05;
     this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.05;
 
-    const zoomLerp = this.slowZoom ? 0.022 : 0.08;
+    const zoomLerp = this.slowZoom ? 0.073 : 0.08;
     this.zoomFactor += (this.targetZoomFactor - this.zoomFactor) * zoomLerp;
     this.zoomInT = THREE.MathUtils.clamp(
       (1 - this.zoomFactor) / (1 - this.minZoom),

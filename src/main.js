@@ -328,7 +328,7 @@ class App {
 
     const zoomInT = sm.zoomInT || 0;
     const targetMorph = this.hubLocked ? 1 : 0;
-    this.hubMorph += (targetMorph - this.hubMorph) * 0.012;
+    this.hubMorph += (targetMorph - this.hubMorph) * 0.04;
     const morph = this.hubMorph;
     this.world.setHudPortalProgress(this.portalKind === 'hub' ? morph : 0);
     this.world.setTerminalPortalProgress(this.portalKind === 'term' ? morph : 0);
