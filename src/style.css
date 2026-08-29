@@ -438,11 +438,236 @@ body, html {
   box-shadow: 0 0 36px rgba(0, 240, 255, 0.7);
 }
 
+.hub-page {
+  --hub-t: 40%;
+  --hub-r: 20%;
+  --hub-b: 40%;
+  --hub-l: 20%;
+  --hub-rad: 18px;
+  --hub-op: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  opacity: var(--hub-op);
+  clip-path: inset(var(--hub-t) var(--hub-r) var(--hub-b) var(--hub-l) round var(--hub-rad));
+  background: linear-gradient(180deg, #041018 0%, #062430 42%, #033844 100%);
+  color: #e8ffff;
+  overflow: hidden;
+  user-select: text;
+}
+
+.hub-page.is-live {
+  pointer-events: none;
+}
+
+.hub-page.is-full {
+  pointer-events: auto;
+  clip-path: none;
+}
+
+.hub-page-scan {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 255, 255, 0.045) 0 1px,
+    transparent 1px 26px
+  );
+  pointer-events: none;
+}
+
+.hub-page-inner {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  overflow: auto;
+  padding: 48px 56px 72px;
+}
+
+.hub-page-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.hub-kicker {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: #7af7ff;
+  margin-bottom: 8px;
+}
+
+.hub-page h1 {
+  font-size: clamp(32px, 5vw, 64px);
+  font-weight: 800;
+  color: #7af7ff;
+  letter-spacing: 0.02em;
+}
+
+.hub-sub {
+  margin-top: 8px;
+  color: #b8fff8;
+  font-size: 16px;
+}
+
+.hub-back-btn {
+  pointer-events: auto;
+  border: 1px solid var(--border-focus);
+  background: rgba(4, 24, 36, 0.72);
+  color: #7af7ff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.hub-back-btn:hover {
+  background: rgba(0, 240, 255, 0.12);
+}
+
+.hub-status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.hub-status-grid article {
+  background: rgba(4, 24, 36, 0.72);
+  border: 1px solid #00f0ff;
+  border-radius: 8px;
+  padding: 22px 24px;
+}
+
+.hub-status-grid span {
+  display: block;
+  color: #67f0ff;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.hub-status-grid strong {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.hub-block {
+  background: rgba(0, 240, 255, 0.12);
+  border-radius: 8px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+}
+
+.hub-block h2,
+.hub-columns h3 {
+  color: #e8ffff;
+  margin-bottom: 12px;
+}
+
+.hub-block p,
+.hub-columns p {
+  color: #d4ffff;
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+
+.hub-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.hub-columns article {
+  background: rgba(4, 24, 36, 0.55);
+  border: 1px solid rgba(0, 240, 255, 0.28);
+  border-radius: 8px;
+  padding: 22px;
+}
+
+body.hub-full .ui-overlay {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.term-page {
+  background: linear-gradient(180deg, #070b08 0%, #0b1a10 55%, #07140c 100%);
+  color: #7dff9a;
+}
+
+.term-scan {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(61, 255, 120, 0.05) 0 1px,
+    transparent 1px 22px
+  );
+}
+
+.term-kicker,
+.term-title,
+.term-sub {
+  color: #7dff9a;
+  font-family: var(--font-mono);
+}
+
+.term-title {
+  font-size: clamp(28px, 4vw, 48px);
+}
+
+.term-back-btn {
+  border-color: #3dff78;
+  color: #7dff9a;
+}
+
+.term-back-btn:hover {
+  background: rgba(61, 255, 120, 0.12);
+}
+
+.term-inner {
+  font-family: var(--font-mono);
+}
+
+.term-log {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #3dff78;
+  white-space: pre-wrap;
+  margin-bottom: 28px;
+}
+
+.term-prompt {
+  font-size: 18px;
+  color: #7dff9a;
+}
+
+.term-prompt span:first-child {
+  color: #b8ffc8;
+}
+
+.term-caret {
+  animation: pulseDot 1s infinite;
+}
+
 @media (max-width: 768px) {
   .ui-overlay {
     padding: 16px;
   }
   .sec-nav-btn span {
     display: none;
+  }
+  .hub-page-inner {
+    padding: 28px 20px 48px;
+  }
+  .hub-status-grid,
+  .hub-columns {
+    grid-template-columns: 1fr;
   }
 }

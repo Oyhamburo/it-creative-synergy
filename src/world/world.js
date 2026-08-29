@@ -14,6 +14,8 @@ export class World {
     this.sceneManager = sceneManager;
 
     this.interactiveObjects = [];
+    this.onHudOpen = null;
+    this.onTerminalOpen = null;
     this.orbitingProjects = [];
     this.robotMesh = null;
     this.robotGroup = null;
@@ -23,6 +25,11 @@ export class World {
 
     this.showProjectCore = false;
     this.showBackgroundWall = false;
+    this.hudPanel = null;
+    this.hudLabel = null;
+    this.hudFocus = null;
+    this.terminalPanel = null;
+    this.terminalFocus = null;
 
     this.sparks = new SparkSystem(this.scene);
     this.gltfLoader = new GLTFLoader();
@@ -1574,34 +1581,14 @@ export class World {
   }
 
   addDashedScreenMarker(screen) {
-    const { corners, center } = this.screenRectFromPoints(screen.pts, screen.n, screen);
+    const { corners } = this.screenRectFromPoints(screen.pts, screen.n, screen);
     const toLocal = (p) => this.platformGroup.worldToLocal(p.clone());
     const localCorners = corners.map(toLocal);
-    const localCenter = toLocal(center);
 
     const rounded = screen.rounded === true;
     const roundedMesh = rounded
       ? this.makeRoundedScreenGeometry(localCorners, screen.cornerRadius ?? 0.14)
       : null;
-
-    const loop = roundedMesh
-      ? [...roundedMesh.outline, roundedMesh.outline[0]]
-      : [...localCorners, localCorners[0]];
-    const geom = new THREE.BufferGeometry().setFromPoints(loop);
-    const mat = new THREE.LineDashedMaterial({
-      color: screen.color,
-      dashSize: 0.12,
-      gapSize: 0.07,
-      transparent: true,
-      opacity: 0.95,
-      depthTest: false,
-      depthWrite: false
-    });
-    const line = new THREE.Line(geom, mat);
-    line.computeLineDistances();
-    line.renderOrder = 20;
-    line.name = `${screen.id}-outline`;
-    this.screenHelperGroup.add(line);
 
     let panelGeo;
     if (roundedMesh) {
@@ -1643,33 +1630,84 @@ export class World {
     panel.name = `${screen.id}-panel`;
     this.screenHelperGroup.add(panel);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, 512, 128);
-    ctx.font = 'bold 42px "Plus Jakarta Sans", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.lineWidth = 8;
-    ctx.strokeStyle = '#000000';
-    ctx.strokeText(screen.label, 256, 64);
-    ctx.fillStyle = `#${screen.color.toString(16).padStart(6, '0')}`;
-    ctx.fillText(screen.label, 256, 64);
+    if (screen.id === 'hologram') {
+      this.hudPanel = panel;
+      this.platformGroup.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(panel);
+      this.hudFocus = box.getCenter(new THREE.Vector3());
+      panel.userData = {
+        type: 'hub',
+        name: 'Hub',
+        onClick: () => { this.onHudOpen?.(); }
+      };
+      this.interactiveObjects.push(panel);
+    }
 
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    const label = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: tex,
-      transparent: true,
-      depthTest: false
-    }));
-    label.scale.set(1.05, 0.26, 1);
-    const top = localCorners.reduce((p, q) => (q.y > p.y ? q : p), localCorners[0]);
-    label.position.copy(top).lerp(localCenter, 0.15);
-    label.position.y += 0.12;
-    label.renderOrder = 22;
-    this.screenHelperGroup.add(label);
+    if (screen.id === 'terminal') {
+      this.terminalPanel = panel;
+      this.platformGroup.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(panel);
+      this.terminalFocus = box.getCenter(new THREE.Vector3());
+      panel.userData = {
+        type: 'terminal',
+        name: 'Terminal',
+        onClick: () => { this.onTerminalOpen?.(); }
+      };
+      this.interactiveObjects.push(panel);
+    }
+  }
+
+  getHudScreenRect(camera, width, height) {
+    return this.getScreenRect(this.hudPanel, camera, width, height);
+  }
+
+  getTerminalScreenRect(camera, width, height) {
+    return this.getScreenRect(this.terminalPanel, camera, width, height);
+  }
+
+  getScreenRect(panel, camera, width, height) {
+    if (!panel) return null;
+    panel.updateWorldMatrix(true, false);
+    const pos = panel.geometry.getAttribute('position');
+    if (!pos) return null;
+    const v = new THREE.Vector3();
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    let hits = 0;
+    for (let i = 0; i < pos.count; i += 1) {
+      v.fromBufferAttribute(pos, i);
+      panel.localToWorld(v);
+      v.project(camera);
+      if (Math.abs(v.z) > 1) continue;
+      const x = (v.x * 0.5 + 0.5) * width;
+      const y = (-v.y * 0.5 + 0.5) * height;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+      hits += 1;
+    }
+    if (!hits) return null;
+    return {
+      x: minX,
+      y: minY,
+      w: Math.max(8, maxX - minX),
+      h: Math.max(8, maxY - minY)
+    };
+  }
+
+  setHudPortalProgress(morph) {
+    if (this.hudPanel?.material) {
+      this.hudPanel.material.opacity = 0.96 * (1 - morph);
+    }
+  }
+
+  setTerminalPortalProgress(morph) {
+    if (this.terminalPanel?.material) {
+      this.terminalPanel.material.opacity = 0.96 * (1 - morph);
+    }
   }
 
   createHudScreenTexture(rounded = false) {

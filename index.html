@@ -91,8 +91,68 @@
           <line x1="12" y1="16" x2="12" y2="12"></line>
           <line x1="12" y1="8" x2="12.01" y2="8"></line>
         </svg>
-        <span>Rueda del mouse: Zoom In/Out | Clic en proyectos para abrir</span>
+        <span>Clic en la pantalla HUB o en la terminal para abrir. ESC o SALIR para volver.</span>
       </div>
+    </div>
+  </div>
+
+  <div id="hub-page" class="hub-page" aria-hidden="true">
+    <div class="hub-page-scan"></div>
+    <div class="hub-page-inner">
+      <header class="hub-page-top">
+        <div>
+          <p class="hub-kicker">HUD  ·  HUB STATUS  ·  LIVE</p>
+          <h1>IT CREATIVE SYNERGY</h1>
+          <p class="hub-sub">Global Innovation Hub — campus digital</p>
+        </div>
+        <button type="button" id="hub-page-back" class="hub-back-btn">SALIR · ESC</button>
+      </header>
+
+      <section class="hub-status-grid">
+        <article><span>CORE</span><strong>ONLINE</strong></article>
+        <article><span>NET</span><strong>STABLE</strong></article>
+        <article><span>SYNC</span><strong>98%</strong></article>
+        <article><span>BOT</span><strong>DOCKED</strong></article>
+      </section>
+
+      <section class="hub-block">
+        <h2>ACTIVE MODULES</h2>
+        <p>NEBULA · MATRIX · SUNSET</p>
+        <p>Campus hub online · Platform locked · Terminal 01 linked</p>
+        <p>Raycast ready · Atmosphere synced · Graffiti unit docked</p>
+      </section>
+
+      <section class="hub-columns">
+        <article>
+          <h3>Qué es el Hub</h3>
+          <p>Un espacio 3D para mostrar productos, equipos y sistemas con la misma estética del campus. Esta vista es la pantalla HUB del set, abierta a pantalla completa.</p>
+        </article>
+        <article>
+          <h3>STATUS</h3>
+          <p>ALL SYSTEMS NOMINAL</p>
+          <p>IT Creative Synergy // Global Innovation Hub</p>
+        </article>
+        <article>
+          <h3>Entrada</h3>
+          <p>Clic en la pantalla HUB para entrar. ESC o SALIR te devuelve al hall.</p>
+        </article>
+      </section>
+    </div>
+  </div>
+
+  <div id="term-page" class="hub-page term-page" aria-hidden="true">
+    <div class="hub-page-scan term-scan"></div>
+    <div class="hub-page-inner term-inner">
+      <header class="hub-page-top">
+        <div>
+          <p class="hub-kicker term-kicker">TERMINAL 01  //  SYSTEM READY</p>
+          <h1 class="term-title">root@campus</h1>
+          <p class="hub-sub term-sub">it-creative-synergy · neon-cyber</p>
+        </div>
+        <button type="button" id="term-page-back" class="hub-back-btn term-back-btn">SALIR · ESC</button>
+      </header>
+      <pre class="term-log" id="term-log"></pre>
+      <p class="term-prompt"><span>root@campus:~$</span> <span class="term-caret">_</span></p>
     </div>
   </div>
 

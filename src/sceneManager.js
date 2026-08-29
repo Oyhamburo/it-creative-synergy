@@ -14,8 +14,11 @@ export class SceneManager {
     // Mouse wheel zoom parameters
     this.zoomFactor = 1.0;
     this.targetZoomFactor = 1.0;
-    this.minZoom = 0.55;
+    this.minZoom = 0.36;
     this.maxZoom = 2.2;
+    this.zoomLocked = false;
+    this.slowZoom = false;
+    this.zoomInT = 0;
 
     this.initScene();
     this.initCamera();
@@ -103,6 +106,7 @@ export class SceneManager {
   }
 
   onWheel(e) {
+    if (this.zoomLocked) return;
     this.targetZoomFactor += e.deltaY * 0.0015;
     this.targetZoomFactor = THREE.MathUtils.clamp(this.targetZoomFactor, this.minZoom, this.maxZoom);
   }
@@ -118,20 +122,30 @@ export class SceneManager {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   }
 
-  update(deltaTime) {
+  update(deltaTime, focus = null) {
     this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.05;
     this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.05;
 
-    // Smooth Lerp for Zoom
-    this.zoomFactor += (this.targetZoomFactor - this.zoomFactor) * 0.08;
+    const zoomLerp = this.slowZoom ? 0.022 : 0.08;
+    this.zoomFactor += (this.targetZoomFactor - this.zoomFactor) * zoomLerp;
+    this.zoomInT = THREE.MathUtils.clamp(
+      (1 - this.zoomFactor) / (1 - this.minZoom),
+      0,
+      1
+    );
 
-    const pFactor = 0.35;
+    const look = this.currentTarget.clone();
+    const pFactor = 0.35 * (focus?.hudFocus ? (1 - this.zoomInT * 0.9) : 1);
+    if (focus?.hudFocus && this.zoomInT > 0) {
+      look.lerp(focus.hudFocus, this.zoomInT * 0.82);
+    }
+
     const targetX = (this.cameraPos.x + this.mouse.x * pFactor) * this.zoomFactor;
     const targetY = (this.cameraPos.y + this.mouse.y * pFactor * 0.3) * this.zoomFactor;
     const targetZ = this.cameraPos.z * this.zoomFactor;
 
     this.camera.position.set(targetX, targetY, targetZ);
-    this.camera.lookAt(this.currentTarget);
+    this.camera.lookAt(look);
   }
 
   render() {

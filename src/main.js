@@ -54,6 +54,7 @@ class App {
 
     this.initUI();
     this.initModals();
+    this.initHubPage();
     this.initRaycasting();
     this.startLoop();
   }
@@ -183,7 +184,12 @@ class App {
     });
 
     window.addEventListener('click', (e) => {
-      if (e.target.closest('.ui-overlay') || e.target.closest('.modal-card')) {
+      if (
+        e.target.closest('.ui-overlay')
+        || e.target.closest('.modal-card')
+        || e.target.closest('#hub-page')
+        || e.target.closest('#term-page')
+      ) {
         return;
       }
 
@@ -198,7 +204,9 @@ class App {
 
         if (hitObj && hitObj.userData && hitObj.userData.onClick) {
           hitObj.userData.onClick();
-          this.showTooltip(hitObj.userData);
+          if (hitObj.userData.type !== 'hub' && hitObj.userData.type !== 'terminal') {
+            this.showTooltip(hitObj.userData);
+          }
         }
       }
     });
@@ -220,6 +228,156 @@ class App {
     this.tooltipTimeout = setTimeout(() => {
       tooltip.classList.remove('visible');
     }, 4000);
+  }
+
+  initHubPage() {
+    this.hubPage = document.querySelector('#hub-page');
+    this.termPage = document.querySelector('#term-page');
+    this.termLog = document.querySelector('#term-log');
+    this.portalKind = null;
+    this.hubLocked = false;
+    this.hubExiting = false;
+    this.hubMorph = 0;
+    this.world.onHudOpen = () => this.openScreenPage('hub');
+    this.world.onTerminalOpen = () => this.openScreenPage('term');
+
+    const termLines = [
+      '> boot --campus it-creative-synergy',
+      '> mount /platform/neon-cyber',
+      '> load bot -- graffiti-unit',
+      '> screens.map hud, terminal',
+      '  [ok] renderer   three r174',
+      '  [ok] lighting   neon / lime / amber',
+      '  [ok] atmosphere nebula / matrix / sunset',
+      '  [ok] hub        linked',
+      'root@campus:~$ status',
+      'CORE online · NET stable · SYNC 98% · BOT docked'
+    ];
+    this.termLog.textContent = termLines.join('\n');
+
+    document.querySelector('#hub-page-back').addEventListener('click', (e) => {
+      e.stopPropagation();
+      audioManager.playUIClick();
+      this.exitHubPage();
+    });
+    document.querySelector('#term-page-back').addEventListener('click', (e) => {
+      e.stopPropagation();
+      audioManager.playUIClick();
+      this.exitHubPage();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && (this.hubLocked || this.hubMorph > 0.2)) {
+        this.exitHubPage();
+      }
+    });
+
+    [this.hubPage, this.termPage].forEach((page) => {
+      page.addEventListener('wheel', (e) => {
+        if (this.hubLocked) return;
+        this.sceneManager.onWheel(e);
+      }, { passive: true });
+    });
+  }
+
+  openScreenPage(kind) {
+    if (this.hubLocked || this.hubExiting) return;
+    audioManager.playUIClick();
+    this.portalKind = kind;
+    this.hubLocked = true;
+    this.hubExiting = false;
+    this.sceneManager.slowZoom = true;
+    this.sceneManager.zoomLocked = true;
+    this.sceneManager.targetZoomFactor = this.sceneManager.minZoom;
+    this.activePage()?.setAttribute('aria-hidden', 'false');
+  }
+
+  activePage() {
+    if (this.portalKind === 'term') return this.termPage;
+    if (this.portalKind === 'hub') return this.hubPage;
+    return null;
+  }
+
+  activeFocus() {
+    return this.portalKind === 'term' ? this.world.terminalFocus : this.world.hudFocus;
+  }
+
+  activeRect(sm) {
+    if (this.portalKind === 'term') {
+      return this.world.getTerminalScreenRect(sm.camera, sm.width, sm.height);
+    }
+    return this.world.getHudScreenRect(sm.camera, sm.width, sm.height);
+  }
+
+  exitHubPage() {
+    this.hubLocked = false;
+    this.hubExiting = true;
+    this.sceneManager.zoomLocked = false;
+    this.sceneManager.slowZoom = true;
+    this.sceneManager.targetZoomFactor = 1;
+  }
+
+  updateHubPage() {
+    const sm = this.sceneManager;
+    const page = this.activePage();
+    if (!page) {
+      this.world.setHudPortalProgress(0);
+      this.world.setTerminalPortalProgress(0);
+      return;
+    }
+
+    const zoomInT = sm.zoomInT || 0;
+    const targetMorph = this.hubLocked ? 1 : 0;
+    this.hubMorph += (targetMorph - this.hubMorph) * 0.012;
+    const morph = this.hubMorph;
+    this.world.setHudPortalProgress(this.portalKind === 'hub' ? morph : 0);
+    this.world.setTerminalPortalProgress(this.portalKind === 'term' ? morph : 0);
+
+    if (this.hubExiting && zoomInT < 0.12 && morph < 0.04) {
+      this.hubExiting = false;
+      this.portalKind = null;
+      sm.slowZoom = false;
+      this.hubPage.style.setProperty('--hub-op', '0');
+      this.termPage.style.setProperty('--hub-op', '0');
+      this.hubPage.classList.remove('is-live', 'is-full');
+      this.termPage.classList.remove('is-live', 'is-full');
+      document.body.classList.remove('hub-full');
+      return;
+    }
+
+    const w = sm.width;
+    const h = sm.height;
+    const rect = this.activeRect(sm);
+    const clamp = (n) => Math.max(0, Math.min(90, n));
+
+    if (morph < 0.015 || (!rect && !this.hubLocked)) {
+      page.style.setProperty('--hub-op', '0');
+      page.classList.remove('is-live', 'is-full');
+      document.body.classList.remove('hub-full');
+      return;
+    }
+
+    const hudT = rect ? (rect.y / h) * 100 : 8;
+    const hudL = rect ? (rect.x / w) * 100 : 12;
+    const hudR = rect ? (1 - (rect.x + rect.w) / w) * 100 : 12;
+    const hudB = rect ? (1 - (rect.y + rect.h) / h) * 100 : 18;
+
+    page.style.setProperty('--hub-t', `${(clamp(hudT) * (1 - morph)).toFixed(3)}%`);
+    page.style.setProperty('--hub-r', `${(clamp(hudR) * (1 - morph)).toFixed(3)}%`);
+    page.style.setProperty('--hub-b', `${(clamp(hudB) * (1 - morph)).toFixed(3)}%`);
+    page.style.setProperty('--hub-l', `${(clamp(hudL) * (1 - morph)).toFixed(3)}%`);
+    page.style.setProperty('--hub-rad', `${(18 * (1 - morph)).toFixed(1)}px`);
+    page.style.setProperty('--hub-op', String(Math.min(1, morph * 1.08)));
+    page.classList.add('is-live');
+
+    const other = page === this.hubPage ? this.termPage : this.hubPage;
+    other.style.setProperty('--hub-op', '0');
+    other.classList.remove('is-live', 'is-full');
+
+    const isFull = morph > 0.985;
+    page.classList.toggle('is-full', isFull);
+    document.body.classList.toggle('hub-full', isFull);
+    page.setAttribute('aria-hidden', morph < 0.06 ? 'true' : 'false');
   }
 
   updateFPS(currentTime) {
@@ -244,14 +402,19 @@ class App {
       this.raycaster.setFromCamera(this.pointer, this.sceneManager.camera);
       const intersects = this.raycaster.intersectObjects(this.world.interactiveObjects, true);
 
-      if (intersects.length > 0) {
+      if (this.hubLocked) {
+        document.body.style.cursor = 'default';
+      } else if (intersects.length > 0) {
         document.body.style.cursor = 'pointer';
       } else {
         document.body.style.cursor = 'default';
       }
 
       this.world.update(elapsedTime, deltaTime);
-      this.sceneManager.update(deltaTime);
+      this.sceneManager.update(deltaTime, {
+        hudFocus: (this.hubLocked || this.hubMorph > 0.04) ? this.activeFocus() : null
+      });
+      this.updateHubPage();
       this.sceneManager.render();
       this.updateFPS(elapsedTime);
 
