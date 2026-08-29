@@ -498,6 +498,7 @@ export class World {
     this.backdrops = {};
     this.currentBackdrop = 'nebula';
     this.rainSpeeds = null;
+    this.atmospherePanels = [];
 
     this.backdrops.nebula = this.buildNebulaBackdrop();
     this.backdrops.matrix = this.buildMatrixBackdrop();
@@ -524,11 +525,10 @@ export class World {
       ]
     })));
 
-    this.addGlowPlanes(group, [
-      { color: 0xff2d95, pos: [-10, 3.5, -14], scale: [18, 10, 1], opacity: 0.16 },
-      { color: 0x00e5ff, pos: [11, 2.8, -13], scale: [16, 9, 1], opacity: 0.15 },
-      { color: 0x7c3aed, pos: [0, 6.5, -18], scale: [22, 12, 1], opacity: 0.12 }
-    ]);
+    this.addAtmospherePanels(group, {
+      accentA: '#00e5ff',
+      accentB: '#ff2d95'
+    });
 
     group.add(this.makeHorizonGrid('rgba(0, 240, 255, 0.28)'));
     group.add(this.makeStarField(900, ['#ffffff', '#00f0ff', '#ff4d9d', '#c4b5fd']));
@@ -550,10 +550,10 @@ export class World {
       scanlines: true
     })));
 
-    this.addGlowPlanes(group, [
-      { color: 0x00ff88, pos: [0, 4, -16], scale: [24, 14, 1], opacity: 0.12 },
-      { color: 0x39ff14, pos: [-8, 1.5, -10], scale: [12, 6, 1], opacity: 0.08 }
-    ]);
+    this.addAtmospherePanels(group, {
+      accentA: '#39ff14',
+      accentB: '#00ff88'
+    });
 
     group.add(this.makeHorizonGrid('rgba(0, 255, 136, 0.32)'));
     group.add(this.makeStarField(400, ['#7CFFB2', '#00ff88', '#d1fae5']));
@@ -597,11 +597,10 @@ export class World {
       ]
     })));
 
-    this.addGlowPlanes(group, [
-      { color: 0xff6b35, pos: [0, 1.2, -15], scale: [28, 8, 1], opacity: 0.22 },
-      { color: 0xff2d95, pos: [-8, 3, -12], scale: [14, 8, 1], opacity: 0.14 },
-      { color: 0xffb703, pos: [8, 2.2, -11], scale: [12, 6, 1], opacity: 0.12 }
-    ]);
+    this.addAtmospherePanels(group, {
+      accentA: '#ffb703',
+      accentB: '#ff2d95'
+    });
 
     group.add(this.makeHorizonGrid('rgba(255, 140, 64, 0.22)'));
     group.add(this.makeStarField(260, ['#ffe8c2', '#ffb703', '#ff8a65']));
@@ -639,6 +638,338 @@ export class World {
       glow.scale.set(...cfg.scale);
       group.add(glow);
     });
+  }
+
+  addAtmospherePanels(group, { accentA = '#00e5ff', accentB = '#ff2d95' } = {}) {
+    const layouts = [
+      { kind: 'schematic', pos: [0.15, 5.85, -16.4], size: [7.8, 4.4], rot: [0.05, 0.05, -0.02] },
+      { kind: 'code', pos: [-8.2, 3.9, -12.6], size: [5.4, 3.3], rot: [0.1, 0.52, 0.04] },
+      { kind: 'chart', pos: [8.4, 2.7, -12.2], size: [5.6, 3.2], rot: [0.12, -0.48, -0.03] },
+      { kind: 'dashboard', pos: [-6.6, 1.35, -9.8], size: [4.0, 2.45], rot: [0.16, 0.34, 0.02] },
+      { kind: 'logs', pos: [6.1, 5.15, -10.6], size: [4.4, 2.4], rot: [0.07, -0.28, 0.05] },
+      { kind: 'nodes', pos: [2.4, 1.2, -14.6], size: [4.8, 2.7], rot: [0.18, -0.08, -0.04] },
+      { kind: 'metrics', pos: [-3.8, 6.35, -13.2], size: [3.6, 2.1], rot: [0.04, 0.22, -0.06] },
+      { kind: 'circuit', pos: [4.6, 0.95, -11.4], size: [3.5, 2.0], rot: [0.2, -0.18, 0.03] }
+    ];
+
+    const panels = [];
+    layouts.forEach((cfg, i) => {
+      const wrap = new THREE.Group();
+      wrap.position.set(...cfg.pos);
+      wrap.rotation.set(...cfg.rot);
+      wrap.userData.baseY = cfg.pos[1];
+      wrap.userData.baseRotZ = cfg.rot[2];
+      wrap.userData.phase = i * 0.85;
+      wrap.userData.kind = 'atmosphere-panel';
+
+      const glow = new THREE.Mesh(
+        new THREE.PlaneGeometry(cfg.size[0] * 1.08, cfg.size[1] * 1.12),
+        new THREE.MeshBasicMaterial({
+          color: i % 2 ? accentB : accentA,
+          transparent: true,
+          opacity: 0.16,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: false,
+          toneMapped: false,
+          side: THREE.DoubleSide
+        })
+      );
+      glow.position.z = -0.04;
+      glow.renderOrder = 1;
+
+      const panel = new THREE.Mesh(
+        new THREE.PlaneGeometry(cfg.size[0], cfg.size[1]),
+        new THREE.MeshBasicMaterial({
+          map: this.createAtmospherePanelTexture(cfg.kind, accentA, accentB),
+          transparent: true,
+          opacity: 0.88,
+          toneMapped: false,
+          depthWrite: false,
+          fog: false,
+          side: THREE.DoubleSide
+        })
+      );
+      panel.renderOrder = 2;
+
+      wrap.add(glow);
+      wrap.add(panel);
+      group.add(wrap);
+      panels.push(wrap);
+    });
+
+    group.userData.atmospherePanels = panels;
+  }
+
+  createAtmospherePanelTexture(kind, accentA, accentB) {
+    const w = 1024;
+    const h = 640;
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    const radius = 36;
+
+    const roundRect = (x, y, rw, rh, r) => {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + rw, y, x + rw, y + rh, r);
+      ctx.arcTo(x + rw, y + rh, x, y + rh, r);
+      ctx.arcTo(x, y + rh, x, y, r);
+      ctx.arcTo(x, y, x + rw, y, r);
+      ctx.closePath();
+    };
+
+    ctx.clearRect(0, 0, w, h);
+    roundRect(8, 8, w - 16, h - 16, radius);
+    ctx.save();
+    ctx.clip();
+
+    const glass = ctx.createLinearGradient(0, 0, w, h);
+    glass.addColorStop(0, 'rgba(10, 24, 52, 0.72)');
+    glass.addColorStop(0.55, 'rgba(6, 14, 32, 0.58)');
+    glass.addColorStop(1, 'rgba(4, 8, 22, 0.5)');
+    ctx.fillStyle = glass;
+    ctx.fillRect(0, 0, w, h);
+
+    const sheen = ctx.createRadialGradient(180, 80, 20, 220, 120, 520);
+    sheen.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+    sheen.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = sheen;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = 'rgba(0, 240, 255, 0.045)';
+    for (let y = 24; y < h - 20; y += 4) {
+      ctx.fillRect(24, y, w - 48, 1);
+    }
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+    ctx.fillRect(28, 24, w - 56, 56);
+    ctx.fillStyle = accentA;
+    ctx.font = '600 22px "JetBrains Mono", monospace';
+    const titles = {
+      schematic: 'SCHEMATIC  //  LENS-04',
+      code: 'SRC  //  hub.render.js',
+      chart: 'TELEMETRY  //  LIVE',
+      dashboard: 'SYS  //  CLUSTER',
+      logs: 'LOG  //  /var/holo',
+      nodes: 'NET  //  MESH GRAPH',
+      metrics: 'IO  //  THROUGHPUT',
+      circuit: 'PCB  //  TRACE-09'
+    };
+    ctx.fillText(titles[kind] || 'PANEL', 44, 60);
+    ctx.fillStyle = accentB;
+    ctx.font = '500 16px "JetBrains Mono", monospace';
+    ctx.fillText('HOLO  ·  ONLINE', w - 220, 60);
+
+    ctx.beginPath();
+    ctx.arc(w - 44, 48, 7, 0, Math.PI * 2);
+    ctx.fillStyle = accentA;
+    ctx.fill();
+
+    if (kind === 'code') {
+      const lines = [
+        ['const', ' hub = createCampus({ neon: true })'],
+        ['hub.mount', '(platform, { scale: 7.2 })'],
+        ['await', ' hub.loadBot("graffiti-unit")'],
+        ['screens.bind', '(["hud", "terminal"])'],
+        ['if', ' (status.online) emit("READY")'],
+        ['export', ' default hub.loop()']
+      ];
+      ctx.font = '500 28px "JetBrains Mono", monospace';
+      lines.forEach((line, i) => {
+        ctx.fillStyle = accentB;
+        ctx.fillText(line[0], 48, 140 + i * 72);
+        ctx.fillStyle = accentA;
+        ctx.fillText(line[1], 48 + ctx.measureText(line[0]).width, 140 + i * 72);
+      });
+    }
+
+    if (kind === 'chart') {
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = 1;
+      for (let y = 140; y < 520; y += 70) {
+        ctx.beginPath();
+        ctx.moveTo(60, y);
+        ctx.lineTo(960, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = accentA;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      const pts = [80, 420, 180, 360, 280, 390, 400, 250, 520, 280, 640, 180, 780, 220, 920, 140];
+      ctx.moveTo(pts[0], pts[1]);
+      for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]);
+      ctx.stroke();
+      ctx.fillStyle = accentB;
+      for (let i = 0; i < pts.length; i += 2) {
+        ctx.beginPath();
+        ctx.arc(pts[i], pts[i + 1], 7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      [180, 140, 220, 110, 160].forEach((bh, i) => {
+        ctx.fillStyle = i % 2 ? accentA : accentB;
+        ctx.globalAlpha = 0.5;
+        ctx.fillRect(90 + i * 170, 600 - bh, 64, bh);
+        ctx.globalAlpha = 1;
+      });
+    }
+
+    if (kind === 'schematic') {
+      ctx.strokeStyle = accentA;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(520, 350, 168, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(520, 350, 96, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = accentB;
+      ctx.beginPath();
+      ctx.moveTo(520, 150);
+      ctx.lineTo(520, 550);
+      ctx.moveTo(320, 350);
+      ctx.lineTo(720, 350);
+      ctx.stroke();
+      for (let a = 0; a < 10; a += 1) {
+        const t = (a / 10) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(520 + Math.cos(t) * 96, 350 + Math.sin(t) * 96);
+        ctx.lineTo(520 + Math.cos(t) * 210, 350 + Math.sin(t) * 210);
+        ctx.stroke();
+      }
+      ctx.fillStyle = accentA;
+      ctx.font = '500 20px "JetBrains Mono", monospace';
+      ctx.fillText('FOV  48°', 48, 590);
+      ctx.fillText('FOCUS  LOCKED', 760, 590);
+    }
+
+    if (kind === 'dashboard') {
+      const cards = [['CORE', 'ONLINE'], ['GPU', '92%'], ['NET', 'OK'], ['BOT', 'DOCK']];
+      cards.forEach((card, i) => {
+        const x = 48 + (i % 2) * 470;
+        const y = 110 + Math.floor(i / 2) * 230;
+        ctx.strokeStyle = i % 2 ? accentB : accentA;
+        ctx.lineWidth = 2;
+        roundRect(x, y, 430, 190, 16);
+        ctx.stroke();
+        ctx.fillStyle = accentA;
+        ctx.font = '600 24px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(card[0], x + 28, y + 70);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 48px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(card[1], x + 28, y + 140);
+      });
+    }
+
+    if (kind === 'logs') {
+      const lines = [
+        '21:38:02  mount /platform/neon-cyber',
+        '21:38:03  load bot -- graffiti-unit',
+        '21:38:04  screens.map hud, terminal',
+        '21:38:05  atmosphere.bind nebula',
+        '21:38:06  [ok] raycast locked',
+        '21:38:07  [ok] panels.holo x8'
+      ];
+      ctx.font = '500 26px "JetBrains Mono", monospace';
+      lines.forEach((line, i) => {
+        ctx.fillStyle = i === lines.length - 1 ? accentB : accentA;
+        ctx.fillText(line, 48, 140 + i * 70);
+      });
+    }
+
+    if (kind === 'nodes') {
+      const nodes = [
+        [180, 220], [360, 160], [540, 240], [720, 170],
+        [280, 380], [500, 420], [760, 360], [430, 300]
+      ];
+      ctx.strokeStyle = accentA;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(nodes[0][0], nodes[0][1]);
+      nodes.forEach(([x, y]) => ctx.lineTo(x, y));
+      ctx.stroke();
+      nodes.forEach(([x, y], i) => {
+        ctx.fillStyle = i % 2 ? accentB : accentA;
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.fillStyle = accentA;
+      ctx.font = '500 22px "JetBrains Mono", monospace';
+      ctx.fillText('NODES  8   LATENCY  12ms', 48, 580);
+    }
+
+    if (kind === 'metrics') {
+      const bars = [0.42, 0.7, 0.55, 0.88, 0.63, 0.91, 0.48, 0.76];
+      bars.forEach((v, i) => {
+        const x = 70 + i * 115;
+        ctx.fillStyle = i % 2 ? accentB : accentA;
+        ctx.globalAlpha = 0.22;
+        ctx.fillRect(x, 140, 72, 400);
+        ctx.globalAlpha = 0.9;
+        ctx.fillRect(x, 540 - 400 * v, 72, 400 * v);
+        ctx.globalAlpha = 1;
+      });
+      ctx.fillStyle = accentA;
+      ctx.font = '500 22px "JetBrains Mono", monospace';
+      ctx.fillText('PKT/s  4.2k   DROP  0.01%', 48, 590);
+    }
+
+    if (kind === 'circuit') {
+      ctx.strokeStyle = accentA;
+      ctx.lineWidth = 3;
+      [[80, 180, 940, 180], [80, 320, 940, 320], [80, 460, 940, 460],
+        [220, 180, 220, 460], [520, 180, 520, 460], [820, 180, 820, 460]].forEach(([x1, y1, x2, y2]) => {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      });
+      [[220, 180], [520, 320], [820, 460], [520, 180], [220, 460]].forEach(([x, y], i) => {
+        ctx.fillStyle = i % 2 ? accentB : accentA;
+        ctx.fillRect(x - 16, y - 16, 32, 32);
+      });
+      ctx.fillStyle = accentA;
+      ctx.font = '500 20px "JetBrains Mono", monospace';
+      ctx.fillText('TRACE OK  ·  5 NODES', 48, 590);
+    }
+
+    ctx.restore();
+
+    [18, 10, 4].forEach((width, i) => {
+      ctx.strokeStyle = accentA;
+      ctx.globalAlpha = i === 2 ? 0.95 : 0.18 - i * 0.04;
+      ctx.lineWidth = width;
+      roundRect(8, 8, w - 16, h - 16, radius);
+      ctx.stroke();
+    });
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = accentB;
+    ctx.lineWidth = 2;
+    roundRect(20, 20, w - 40, h - 40, radius - 8);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    const tick = 42;
+    ctx.strokeStyle = accentA;
+    ctx.lineWidth = 4;
+    const corners = [
+      [18, 18, 1, 1], [w - 18, 18, -1, 1], [18, h - 18, 1, -1], [w - 18, h - 18, -1, -1]
+    ];
+    corners.forEach(([x, y, sx, sy]) => {
+      ctx.beginPath();
+      ctx.moveTo(x, y + sy * tick);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x + sx * tick, y);
+      ctx.stroke();
+    });
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.premultiplyAlpha = true;
+    tex.anisotropy = 4;
+    return tex;
   }
 
   makeHorizonGrid(stroke) {
@@ -730,6 +1061,7 @@ export class World {
     Object.entries(this.backdrops).forEach(([key, group]) => {
       group.visible = key === id;
     });
+    this.atmospherePanels = this.backdrops[id].userData.atmospherePanels || [];
 
     const looks = {
       nebula: { fog: '#0a1024', ambient: 0x4a5d9a, hemiSky: 0xff7ad9, hemiGround: 0x0b3d4a, key: 0xfff1d6 },
@@ -1844,6 +2176,13 @@ export class World {
         if (child.userData?.kind === 'dust') {
           child.rotation.y = elapsedTime * 0.03;
         }
+      });
+    }
+
+    if (this.atmospherePanels?.length) {
+      this.atmospherePanels.forEach((panel) => {
+        panel.position.y = panel.userData.baseY + Math.sin(elapsedTime * 0.65 + panel.userData.phase) * 0.14;
+        panel.rotation.z = panel.userData.baseRotZ + Math.sin(elapsedTime * 0.4 + panel.userData.phase) * 0.012;
       });
     }
 
