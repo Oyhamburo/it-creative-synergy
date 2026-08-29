@@ -4,6 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { audioManager } from '../audio/audioManager.js';
 import { SparkSystem } from '../effects/sparks.js';
 
+const assetUrl = (path) => `${import.meta.env.BASE_URL}${String(path).replace(/^\//, '')}`;
+
 export class World {
   constructor(scene, camera, renderer, sceneManager = null) {
     this.scene = scene;
@@ -473,7 +475,7 @@ export class World {
     holoGroup.add(this.holoScreen);
 
     this.textureLoader.load(
-      '/textures/holo-welcome-hub.png',
+      assetUrl('/textures/holo-welcome-hub.png'),
       (texture) => {
         texture.colorSpace = THREE.SRGBColorSpace;
         texture.anisotropy = Math.min(8, this.renderer?.capabilities?.getMaxAnisotropy?.() || 8);
@@ -1519,7 +1521,7 @@ export class World {
     this.scene.add(this.robotGroup);
 
     try {
-      const platformGltf = await this.loadGltf('/models/Meshy_AI_Neon_Cyber_Synergy_0828223202_texture.glb');
+      const platformGltf = await this.loadGltf(assetUrl('/models/Meshy_AI_Neon_Cyber_Synergy_0828223202_texture.glb'));
       const platform = platformGltf.scene;
       this.prepareModel(platform, { roughness: 0.22, metalness: 0.4, boostEmissive: true });
       const platformBox = this.fitAndGround(platform, 7.2, 'width');
@@ -1532,7 +1534,7 @@ export class World {
       const botX = -platformSize.x * 0.24;
       const botZ = platformSize.z * 0.14;
 
-      const botGltf = await this.loadGltf('/models/Meshy_AI_Graffiti_Bot_0828212914_texture.glb');
+      const botGltf = await this.loadGltf(assetUrl('/models/Meshy_AI_Graffiti_Bot_0828212914_texture.glb'));
       const bot = botGltf.scene;
       this.prepareModel(bot, { roughness: 0.22, metalness: 0.18, boostEmissive: true });
       this.fitAndGround(bot, Math.min(1.62, platformSize.y * 0.504), 'max');
