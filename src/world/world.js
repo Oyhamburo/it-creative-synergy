@@ -529,6 +529,10 @@ export class World {
       accentA: '#00e5ff',
       accentB: '#ff2d95'
     });
+    this.addPerpendicularPanels(group, {
+      accentA: '#00e5ff',
+      accentB: '#ff2d95'
+    });
 
     group.add(this.makeHorizonGrid('rgba(0, 240, 255, 0.28)'));
     group.add(this.makeStarField(900, ['#ffffff', '#00f0ff', '#ff4d9d', '#c4b5fd']));
@@ -551,6 +555,10 @@ export class World {
     })));
 
     this.addAtmospherePanels(group, {
+      accentA: '#39ff14',
+      accentB: '#00ff88'
+    });
+    this.addPerpendicularPanels(group, {
       accentA: '#39ff14',
       accentB: '#00ff88'
     });
@@ -598,6 +606,10 @@ export class World {
     })));
 
     this.addAtmospherePanels(group, {
+      accentA: '#ffb703',
+      accentB: '#ff2d95'
+    });
+    this.addPerpendicularPanels(group, {
       accentA: '#ffb703',
       accentB: '#ff2d95'
     });
@@ -684,6 +696,69 @@ export class World {
           map: this.createAtmospherePanelTexture(cfg.kind, accentA, accentB),
           transparent: true,
           opacity: 0.88,
+          toneMapped: false,
+          depthWrite: false,
+          fog: false,
+          side: THREE.DoubleSide
+        })
+      );
+      panel.renderOrder = 2;
+
+      wrap.add(glow);
+      wrap.add(panel);
+      group.add(wrap);
+      panels.push(wrap);
+    });
+
+    group.userData.atmospherePanels = panels;
+  }
+
+  addPerpendicularPanels(group, { accentA = '#00e5ff', accentB = '#ff2d95' } = {}) {
+    const halfPi = Math.PI / 2;
+    const layouts = [
+      { kind: 'code', pos: [-5.05, 2.95, -3.2], size: [5.8, 3.5], rot: [0.02, halfPi, 0], magenta: false },
+      { kind: 'logs', pos: [5.15, 2.55, -3.5], size: [5.4, 3.2], rot: [0.03, -halfPi, 0], magenta: true },
+      { kind: 'chart', pos: [-3.55, 2.15, 1.6], size: [3.8, 2.6], rot: [0.05, 0.95, 0], magenta: false },
+      { kind: 'dashboard', pos: [3.65, 3.25, 1.2], size: [3.5, 2.4], rot: [0.06, -1.02, 0], magenta: true },
+      { kind: 'metrics', pos: [-6.4, 5.15, -10.2], size: [4.2, 2.5], rot: [0.08, 1.35, 0], magenta: true },
+      { kind: 'nodes', pos: [6.5, 4.75, -10.6], size: [4.6, 2.7], rot: [0.05, -1.32, 0], magenta: false }
+    ];
+
+    const panels = group.userData.atmospherePanels || [];
+    layouts.forEach((cfg, i) => {
+      const primary = cfg.magenta ? accentB : accentA;
+      const secondary = cfg.magenta ? accentA : accentB;
+      const wrap = new THREE.Group();
+      wrap.position.set(...cfg.pos);
+      wrap.rotation.set(...cfg.rot);
+      wrap.userData.baseY = cfg.pos[1];
+      wrap.userData.baseRotZ = cfg.rot[2];
+      wrap.userData.phase = 6.8 + i * 0.7;
+      wrap.userData.kind = 'atmosphere-panel';
+      wrap.userData.keepUpright = true;
+
+      const glow = new THREE.Mesh(
+        new THREE.PlaneGeometry(cfg.size[0] * 1.1, cfg.size[1] * 1.14),
+        new THREE.MeshBasicMaterial({
+          color: primary,
+          transparent: true,
+          opacity: 0.2,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: false,
+          toneMapped: false,
+          side: THREE.DoubleSide
+        })
+      );
+      glow.position.z = -0.05;
+      glow.renderOrder = 1;
+
+      const panel = new THREE.Mesh(
+        new THREE.PlaneGeometry(cfg.size[0], cfg.size[1]),
+        new THREE.MeshBasicMaterial({
+          map: this.createAtmospherePanelTexture(cfg.kind, primary, secondary),
+          transparent: true,
+          opacity: 0.72,
           toneMapped: false,
           depthWrite: false,
           fog: false,
@@ -2182,7 +2257,9 @@ export class World {
     if (this.atmospherePanels?.length) {
       this.atmospherePanels.forEach((panel) => {
         panel.position.y = panel.userData.baseY + Math.sin(elapsedTime * 0.65 + panel.userData.phase) * 0.14;
-        panel.rotation.z = panel.userData.baseRotZ + Math.sin(elapsedTime * 0.4 + panel.userData.phase) * 0.012;
+        if (!panel.userData.keepUpright) {
+          panel.rotation.z = panel.userData.baseRotZ + Math.sin(elapsedTime * 0.4 + panel.userData.phase) * 0.012;
+        }
       });
     }
 
