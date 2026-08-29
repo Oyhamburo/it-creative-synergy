@@ -92,17 +92,6 @@ class App {
       });
     });
 
-    // 3. Project Chips in Bottom Bar
-    document.querySelectorAll('.p-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        const pId = chip.dataset.project;
-        const projectObj = this.world.interactiveObjects.find(obj => obj.name === pId);
-        if (projectObj && projectObj.userData && projectObj.userData.onClick) {
-          projectObj.userData.onClick();
-        }
-      });
-    });
-
     // 4. Theme Switcher
     const themeBtn = document.querySelector('#theme-btn');
     themeBtn.addEventListener('click', (e) => {
